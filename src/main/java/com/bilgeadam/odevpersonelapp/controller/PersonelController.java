@@ -5,6 +5,8 @@ import com.bilgeadam.odevpersonelapp.exception.PersonelNotFoundException;
 import com.bilgeadam.odevpersonelapp.pojo.Bolum;
 import com.bilgeadam.odevpersonelapp.pojo.Sehir;
 import com.bilgeadam.odevpersonelapp.repository.PersonelRepository;
+import com.netflix.appinfo.InstanceInfo;
+import com.netflix.discovery.EurekaClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -19,6 +21,9 @@ public class PersonelController {
 
     @Autowired
     private PersonelRepository personelRepository;
+
+    @Autowired
+    private EurekaClient client;
 
     @GetMapping("/personel/{id}")
     public Personel getKisi(@PathVariable("id") long id)
@@ -64,9 +69,12 @@ public class PersonelController {
 
     private Bolum getBolum(long bolumNo)
     {
-        String bolumURL = "http://localhost:8230";
+        //String bolumURL = "http://localhost:8230";
 
         RestTemplate restTemplate = new RestTemplate();
+        InstanceInfo instanceInfo = client.getNextServerFromEureka("odev-bolum-app", false);
+
+        String bolumURL = instanceInfo.getHomePageUrl();
 
         Bolum bolum = restTemplate.getForObject(bolumURL+"/bolum/" + bolumNo, Bolum.class);
 
@@ -75,9 +83,13 @@ public class PersonelController {
 
     private Sehir getSehir(long sehirNo)
     {
-        String sehirURL = "http://localhost:8240";
+        //String sehirURL = "http://localhost:8240";
 
         RestTemplate restTemplate = new RestTemplate();
+        InstanceInfo instanceInfo = client.getNextServerFromEureka("odev-sehir-app", false);
+
+        String sehirURL = instanceInfo.getHomePageUrl();
+
 
         Sehir sehir = restTemplate.getForObject(sehirURL+"/sehir/" + sehirNo, Sehir.class);
 
